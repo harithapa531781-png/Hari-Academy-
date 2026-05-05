@@ -1,0 +1,9 @@
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: '�export const academicVocabulary = [
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },
+  { en: 'Concentration', ne: 'ध्यान' },

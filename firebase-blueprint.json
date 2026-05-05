@@ -1,0 +1,44 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Public and private information about the user.",
+      "type": "object",
+      "properties": {
+        "displayName": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "photoURL": { "type": "string" },
+        "level": { "type": "integer" },
+        "xp": { "type": "integer" },
+        "streak": { "type": "integer" },
+        "isPremium": { "type": "boolean" },
+        "purchasedCourses": { "type": "array", "items": { "type": "string" } },
+        "lastActive": { "type": "string", "format": "date-time" },
+        "createdAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["displayName", "email", "createdAt"]
+    },
+    "CourseProgress": {
+      "title": "Course Progress",
+      "description": "Tracking progress for a specific course for a user.",
+      "type": "object",
+      "properties": {
+        "courseId": { "type": "string" },
+        "progress": { "type": "integer" },
+        "completedLessons": { "type": "array", "items": { "type": "string" } },
+        "updatedAt": { "type": "string", "format": "date-time" }
+      },
+      "required": ["courseId", "progress", "updatedAt"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "User",
+      "description": "User profile data."
+    },
+    "/users/{userId}/progress/{courseId}": {
+      "schema": "CourseProgress",
+      "description": "Progress tracking for a specific user and course."
+    }
+  }
+}

@@ -1,0 +1,79 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // 0. Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isEmailVerified() {
+      return isSignedIn() && request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    function incoming() {
+      return request.resource.data;
+    }
+
+    function existing() {
+      return resource.data;
+    }
+
+    function isValidId(id) {
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$');
+    }
+
+    // --- Validation Blueprints ---
+
+    function isValidUserSchema(data) {
+      return data.keys().hasAll(['displayName', 'email', 'createdAt'])
+        && data.displayName is string && data.displayName.size() <= 100
+        && data.email is string && data.email.size() <= 150
+        && (data.get('xp', 0) is int && data.get('xp', 0) >= 0)
+        && (data.get('level', 1) is int && data.get('level', 1) >= 1)
+        && (data.get('streak', 0) is int && data.get('streak', 0) >= 0)
+        && (data.get('isPremium', false) is bool)
+        && (data.get('purchasedCourses', []) is list);
+    }
+
+    function isValidProgress(data, pathCourseId) {
+      return data.keys().hasAll(['courseId', 'progress', 'updatedAt'])
+        && data.courseId == pathCourseId
+        && data.progress is int && data.progress >= 0 && data.progress <= 100
+        && data.updatedAt == request.time;
+    }
+
+    // --- Matches ---
+
+    match /users/{userId} {
+      allow get: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isEmailVerified() 
+        && isValidUserSchema(incoming())
+        && incoming().createdAt == request.time;
+      allow update: if isOwner(userId) && isValidId(userId) && isEmailVerified() 
+        && isValidUserSchema(incoming())
+        && incoming().createdAt == existing().createdAt
+        && (
+          incoming().diff(existing()).affectedKeys().hasOnly(['displayName', 'photoURL', 'lastActive', 'streak', 'xp', 'level', 'isPremium', 'purchasedCourses'])
+        );
+    }
+
+    match /users/{userId}/progress/{courseId} {
+      allow get: if isOwner(userId) && isValidId(userId) && isValidId(courseId);
+      allow list: if isOwner(userId) && isValidId(userId);
+      allow create: if isOwner(userId) && isValidId(userId) && isValidId(courseId) && isEmailVerified() && isValidProgress(incoming(), courseId);
+      allow update: if isOwner(userId) && isValidId(userId) && isValidId(courseId) && isEmailVerified() 
+        && isValidProgress(incoming(), courseId)
+        && incoming().courseId == existing().courseId
+        && incoming().diff(existing()).affectedKeys().hasOnly(['progress', 'completedLessons', 'updatedAt']);
+    }
+  }
+}

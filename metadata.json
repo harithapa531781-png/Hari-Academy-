@@ -1,0 +1,14 @@
+{
+  "name": "Hari Academy",
+  "description": "A comprehensive language learning platform specializing in English and Nepali courses, featuring daily lessons, interactive practice sessions, live classes, and progress tracking.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ],
+  "majorCapabilities": [
+    "AI-powered language learning",
+    "Interactive practice sessions",
+    "Live class scheduling",
+    "Progress tracking and achievements"
+  ]
+}
